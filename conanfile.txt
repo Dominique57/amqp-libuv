@@ -1,0 +1,13 @@
+[requires]
+gtest/cci.20210126
+amqp-cpp/4.3.18
+libuv/1.44.2
+boost/1.81.0
+
+[options]
+boost:shared=False
+
+[generators]
+virtualrunenv
+CMakeDeps
+CMakeToolchain
