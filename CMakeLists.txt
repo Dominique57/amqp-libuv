@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(MyProject
+project(rbmq-connector
     VERSION 1.0.0
-    DESCRIPTION "Description"
+    DESCRIPTION "A simple libuv - rbqm crossplatform connector"
     LANGUAGES CXX
 )
 
