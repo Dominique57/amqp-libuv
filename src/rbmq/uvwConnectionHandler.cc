@@ -2,7 +2,7 @@
 
 namespace rbmq {
 
-void UvwConnectionHandler::onData(AMQP::Connection*, const char*, size_t)
+void UvwConnectionHandler::onData(AMQP::Connection*, const char* data, size_t len)
 {
     // @todo
     //  Add your own implementation, for example by doing a call to the
@@ -11,6 +11,10 @@ void UvwConnectionHandler::onData(AMQP::Connection*, const char*, size_t)
     //  the bytes that could not immediately be sent, and try to send
     //  them again when the socket becomes writable again
     std::cout << "UvwConnectionHandler: Data to be sent !\n";
+
+    auto buffer = std::make_unique<char[]>(len);
+    memcpy(buffer.get(), data, len);
+    _client->write(std::move(buffer), len);
 }
 
 void UvwConnectionHandler::onReady(AMQP::Connection*)

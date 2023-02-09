@@ -1,12 +1,16 @@
 #pragma once
 
 #include <amqpcpp.h>
+#include <uvw.hpp>
 
 namespace rbmq {
 
 class UvwConnectionHandler : public AMQP::ConnectionHandler
 {
 public:
+    UvwConnectionHandler(const std::shared_ptr<uvw::TCPHandle>& client)
+        : _client(client)
+    {}
 
 protected:
     /**
@@ -44,6 +48,12 @@ protected:
      *  @param  connection      The connection that was closed and that is now unusable
      */
     void onClosed(AMQP::Connection *connection) override;
+
+public:
+    std::shared_ptr<uvw::TCPHandle> getClient() { return _client; }
+
+protected:
+    std::shared_ptr<uvw::TCPHandle> _client;
 
 };
 

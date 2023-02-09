@@ -5,6 +5,7 @@ add_library(SOURCE_LIB STATIC
     entrypoint.cc entrypoint.h
     rbmq/uvConnectionHandler.cc rbmq/uvConnectionHandler.h
     rbmq/uvwConnectionHandler.cc rbmq/uvwConnectionHandler.h
+    rbmq/uvwConnection.cc rbmq/uvwConnection.h
 )
 target_link_libraries(SOURCE_LIB
     PUBLIC

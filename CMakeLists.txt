@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 
 project(rbmq-connector
     VERSION 1.0.0
@@ -37,11 +37,23 @@ target_compile_features(default_options
     INTERFACE
         cxx_std_17
 )
+target_compile_definitions(default_options
+    INTERFACE
+		$<$<BOOL:${WIN32}>:NOMINMAX>
+)
 target_compile_options(default_options
     INTERFACE
-        "-Wall" "-Wextra" "-pedantic"
+    $<$<BOOL:${WIN32}>:
+		/std:c++17 /W4
+		/wd4275 /wd4251
+		$<$<CONFIG:Release>:/WX /O2 /MD>
+        $<$<CONFIG:Debug>:/DEBUG /Zi /Od /MDd>
+    >
+    $<$<BOOL:${UNIX}>:
+        -std=c++17 -Wall
         $<$<CONFIG:Release>:-Werror -Ofast>
         $<$<CONFIG:Debug>:-O0 -ggdb>
+    >
 )
 
 ## Code coverage options
