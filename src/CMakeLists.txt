@@ -1,4 +1,5 @@
 find_package(amqpcpp REQUIRED)
+find_package(uvw REQUIRED)
 
 add_library(SOURCE_LIB STATIC
     entrypoint.cc entrypoint.h
@@ -8,6 +9,7 @@ add_library(SOURCE_LIB STATIC
 target_link_libraries(SOURCE_LIB
     PUBLIC
         amqpcpp
+        uvw::uvw
         coverage_options
     PRIVATE
         default_options
