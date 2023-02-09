@@ -55,11 +55,18 @@ int entrypoint() {
     // Create amqp-cpp uvw connection handler
     UvwConnectionHandler uvwConHandler(client);
     UvwConnection connection(&uvwConHandler, AMQP::Login("guest","guest"), "/");
-    //AMQP::Connection connection(&uvwConHandler, AMQP::Login("guest","guest"), "/");
     AMQP::Channel channel(&connection);
     channel.declareExchange("my-exchange", AMQP::fanout);
     channel.declareQueue("my-queue");
     channel.bindQueue("my-exchange", "my-queue", "my-routing-key");
+    auto messageCb = [&channel, &client](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
+        const auto msg = std::string(message.body(), message.bodySize());
+        std::cout << "message received: " << msg << std::endl;
+        channel.ack(deliveryTag);
+        client->close();
+    };
+    channel.consume("my-queue")
+        .onReceived(messageCb);
 
     // Restart loop with tcp socket registered to keep reading until disconnection
     client->read();
