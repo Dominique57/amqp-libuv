@@ -17,14 +17,16 @@ int entrypoint() {
     // Create amqp-cpp uvw connection handler
     UvwConnectionHandler uvwConHandler(*loop, "127.0.0.1", 5672);
     assert(uvwConHandler.getClient());
-
     uvwConHandler.addDebugEvent();
+
     UvwConnection connection(&uvwConHandler, AMQP::Login("guest","guest"), "/");
     AMQP::Channel channel(&connection);
+
+    // Define all                          
     channel.declareExchange("my-exchange", AMQP::fanout);
     channel.declareQueue("my-queue");
     channel.bindQueue("my-exchange", "my-queue", "my-routing-key");
-    auto messageCb = [&channel](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
+    auto messageCb = [&channel](const AMQP::Message &message, uint64_t deliveryTag, bool) {
         const auto msg = std::string(message.body(), message.bodySize());
         std::cout << "message received: " << msg << std::endl;
         channel.ack(deliveryTag);

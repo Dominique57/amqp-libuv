@@ -15,7 +15,7 @@ public:
     {
         using namespace uvw;
         if (_client) {
-            _client->on<ErrorEvent>([this](const ErrorEvent &e, TCPHandle &handle){
+            _client->on<ErrorEvent>([this](const ErrorEvent &, TCPHandle &){
                 this->closeConnection();
             });
             _client->connect(ip, port);
