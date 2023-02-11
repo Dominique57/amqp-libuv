@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include "entrypoint.h"
+
 namespace po = boost::program_options;
 
 po::options_description define_options()
@@ -24,8 +26,14 @@ po::variables_map parse_options(const po::options_description& desc, int argc,
 
 int run(const po::options_description& desc, const po::variables_map& vm)
 {
-    if (vm.count("help"))
+    if (vm.count("help")) {
         std::cout << desc << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+    const int retCode = rbmq::entrypoint();
+    if (retCode != 0)
+        return retCode;
 
     return EXIT_SUCCESS;
 }

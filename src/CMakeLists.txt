@@ -1,12 +1,19 @@
+find_package(amqpcpp REQUIRED)
+find_package(uvw REQUIRED)
 
 add_library(SOURCE_LIB STATIC
-    # TODO: add your source file here
-    sample.cc sample.hh
+    entrypoint.cc entrypoint.h
+    rbmq/uvConnectionHandler.cc rbmq/uvConnectionHandler.h
+    rbmq/uvwConnectionHandler.cc rbmq/uvwConnectionHandler.h
+    rbmq/uvwConnection.cc rbmq/uvwConnection.h
 )
 target_link_libraries(SOURCE_LIB
+    PUBLIC
+        amqpcpp
+        uvw::uvw
+        coverage_options
     PRIVATE
         default_options
-        coverage_options
 )
 
 # =============================
@@ -17,11 +24,8 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 add_executable(${PROJECT_NAME} main.cc)
-target_include_directories(${PROJECT_NAME} PUBLIC
-    ${Boost_INCLUDE_DIR}
-)
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC
-    ${Boost_LIBRARIES}
+    Boost::program_options
     default_options
     SOURCE_LIB
 )
