@@ -31,7 +31,8 @@ int run(const po::options_description& desc, const po::variables_map& vm)
         return EXIT_SUCCESS;
     }
 
-    const int retCode = rbmq::entrypoint();
+    // const int retCode = rbmq::entrypoint();
+    const int retCode = rbmq::exampleEntrypoint();
     if (retCode != 0)
         return retCode;
 

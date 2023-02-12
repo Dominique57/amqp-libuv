@@ -6,6 +6,7 @@
 #include <cstdint>
 #include "rbmq/uvwConnectionHandler.h"
 #include "rbmq/uvwConnection.h"
+#include "example/module.h"
 
 namespace rbmq {
 
@@ -40,6 +41,18 @@ int entrypoint() {
     // Finish program
     std::cout << "Finishing...\n";
 
+    return 0;
+}
+
+int exampleEntrypoint() {
+    auto comm = example::ModuleCommunicator();
+    comm.registerMailbox("toto", "toto", [](const AMQP::Message &, uint64_t, bool) {
+        std::cout << "Message received !\n\n";
+    });
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    comm.publish("toto", "toto", "A message !");
+
+    std::this_thread::sleep_for(std::chrono::seconds(5));
     return 0;
 }
 
