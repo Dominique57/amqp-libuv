@@ -7,21 +7,28 @@ ModuleCommunicator::ModuleCommunicator()
       _uvwConnHandler(*_loop, "127.0.0.1", 5672),
       _uvwConn(&_uvwConnHandler, AMQP::Login("guest","guest"), "/"),
       _channel(&_uvwConn),
-      _asyncHandle(_loop->resource<uvw::AsyncHandle>())
+      _threadHandle(),
+      _asyncHandle(_loop->resource<uvw::AsyncHandle>()),
+      _asyncTasks()
 {
     _asyncHandle->on<uvw::ErrorEvent>([this](auto &&...) {
          std::cerr << "AsyncHandle error !\n";
          this->_loop->stop();
     });
     _asyncHandle->on<uvw::AsyncEvent>([this](const uvw::AsyncEvent &e, uvw::AsyncHandle &handle) {
-         std::cerr << "AsyncHandle event: stopping loop !\n";
-         this->_loop->stop();
+        std::cerr << "AsyncHandle event !\n";
+        while (const auto taskOpt = _asyncTasks.try_pop()) {
+            taskOpt.value()();
+        }
     });
 
     _threadHandle = std::thread(&rbmq::example::ModuleCommunicator::runThread, this);
 }
 
 ModuleCommunicator::~ModuleCommunicator() {
+    _asyncTasks.push([this]() {
+        this->_loop->stop();
+    });
     _asyncHandle->send();
     if (_threadHandle.joinable())
         _threadHandle.join();
@@ -29,23 +36,30 @@ ModuleCommunicator::~ModuleCommunicator() {
 
 void ModuleCommunicator::publish(const std::string &exchange,
      const std::string &key, const std::string &message) {
-    // TODO: Thread data rade might occur, need to use asyncHandle !
-    _channel.startTransaction();
-    _channel.publish(exchange, key, message);
-    _channel.commitTransaction();
+    _asyncTasks.push([this, exchange, key, message]() {
+        _channel.startTransaction();
+        _channel.publish(exchange, key, message);
+        _channel.commitTransaction();
+    });
+    _asyncHandle->send();
 }
 
 void ModuleCommunicator::registerMailbox(const std::string &exchange, const std::string &filter,
     const std::function<void(const AMQP::Message &, uint64_t, bool)> &callback) {
-    // TODO: Thread data rade might occur, need to use asyncHandle !
-    _channel.declareQueue(AMQP::exclusive).onSuccess([this, exchange, filter, f = std::move(callback)]
-        (const std::string &name, uint32_t messagecount, uint32_t consumercount) {
-        this->_channel.bindQueue(exchange, name, filter);
-        // TODO: handle error
-        this->_channel.consume(name)
-            .onReceived(std::move(f));
-        // TODO: handle error
+    _asyncTasks.push(
+        [this, exchange, filter, f = std::move(callback)]
+        () {
+        _channel.declareQueue(AMQP::exclusive).onSuccess(
+            [this, exchange = std::move(exchange), filter = std::move(filter), f = std::move(f)]
+            (const std::string &name, uint32_t messagecount, uint32_t consumercount) {
+            this->_channel.bindQueue(exchange, name, filter);
+            // TODO: handle error
+            this->_channel.consume(name)
+                .onReceived(std::move(f));
+            // TODO: handle error
+        });
     });
+    _asyncHandle->send();
 }
 
 

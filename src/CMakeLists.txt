@@ -6,6 +6,8 @@ add_library(SOURCE_LIB STATIC
     rbmq/uvwConnectionHandler.cc rbmq/uvwConnectionHandler.h
     rbmq/uvwConnection.cc rbmq/uvwConnection.h
 
+    rbmq/utils/concurentQueue.h
+
     example/module.cc example/module.h
 )
 target_link_libraries(SOURCE_LIB

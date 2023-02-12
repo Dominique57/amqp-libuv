@@ -5,6 +5,7 @@
 #include <amqpcpp.h>
 #include <rbmq/uvwConnectionHandler.h>
 #include <rbmq/uvwConnection.h>
+#include <rbmq/utils/concurentQueue.h>
 
 
 namespace rbmq::example {
@@ -33,21 +34,23 @@ private:
     /// uvw loop handle
     std::shared_ptr<uvw::Loop> _loop;
 
-    /// TODO
+    /// amqp-uvw connection handler
     rbmq::UvwConnectionHandler _uvwConnHandler;
 
-    /// TODO
+    /// amqp-uvw connection
     rbmq::UvwConnection _uvwConn;
 
-    /// TODO
+    /// amqp channel
     AMQP::Channel _channel;
-
-    /// Async handle to add callbacks
-    std::shared_ptr<uvw::AsyncHandle> _asyncHandle;
 
     /// Thread handle
     std::thread _threadHandle;
 
+    /// Async handle to add callbacks
+    std::shared_ptr<uvw::AsyncHandle> _asyncHandle;
+
+    /// Task queue for main loop
+    rbmq::utils::ConcurentQueue<std::function<void(void)>> _asyncTasks;
 };
 
 }
