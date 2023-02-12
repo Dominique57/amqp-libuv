@@ -22,6 +22,9 @@ public:
 
     void registerMailbox(const std::string &exchange, const std::string &key,
         const std::function<void(const AMQP::Message &, uint64_t, bool)> &callback);
+
+    bool syncRegisterMailbox(const std::string &exchange, const std::string &key,
+        const std::function<void(const AMQP::Message &, uint64_t, bool)> &callback);
         
     // addCallback
 

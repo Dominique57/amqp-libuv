@@ -63,6 +63,37 @@ void ModuleCommunicator::registerMailbox(const std::string &exchange, const std:
 }
 
 
+bool ModuleCommunicator::syncRegisterMailbox(const std::string &exchange, const std::string &filter,
+    const std::function<void(const AMQP::Message &, uint64_t, bool)> &f) {
+    rbmq::utils::ConcurentQueue<bool> taskResult;
+    _asyncTasks.push(
+        [this, &taskResult, exchange, filter, f] () mutable {
+        _channel.declareQueue(AMQP::exclusive)
+        .onSuccess([this, &taskResult, exchange, filter, f = std::move(f)]
+            (const std::string &name, uint32_t messagecount, uint32_t consumercount) mutable {
+            this->_channel.bindQueue(exchange, name, filter)
+            .onSuccess([this, &taskResult, name, f = std::move(f)]() mutable {
+                this->_channel.consume(name)
+                .onReceived(std::move(f))
+                .onSuccess([this, &taskResult]() {
+                    taskResult.push(true);
+                }).onError([this, &taskResult](const char* message) {
+                    std::cerr << "Consumme failed: `" << message << "` !\n";
+                    taskResult.push(false);
+                });
+            }).onError([this, &taskResult](const char* message) {
+                std::cerr << "BindQueue failed: `" << message << "` !\n";
+                taskResult.push(false);
+            });
+        }).onError([this, &taskResult](const char* message) {
+            std::cerr << "QueueDeclare failed: `" << message << "` !\n";
+            taskResult.push(false);
+        });
+    });
+    _asyncHandle->send();
+    return taskResult.pop();
+}
+
 void ModuleCommunicator::runThread() {
     std::cout << " Thread started !\n";
     _loop->run();

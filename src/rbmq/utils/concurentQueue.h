@@ -50,7 +50,7 @@ public:
     T pop()
     {
         // Lock: prevents data race and allows correct notifying
-        std::scoped_lock<std::mutex> lock(_mutex);
+        std::unique_lock<std::mutex> lock(_mutex);
         // Wait until queue is not empty
         _cond.wait(lock, [this]() { return !_queue.empty(); });
         // Retrieve item from the queue and return it
