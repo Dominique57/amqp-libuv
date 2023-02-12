@@ -7,6 +7,7 @@ ModuleCommunicator::ModuleCommunicator()
       _uvwConnHandler(*_loop, "127.0.0.1", 5672),
       _uvwConn(&_uvwConnHandler, AMQP::Login("guest","guest"), "/"),
       _channel(&_uvwConn),
+    //   _rbmqComm(_channel),
       _threadHandle(),
       _asyncHandle(_loop->resource<uvw::AsyncHandle>()),
       _asyncTasks()
@@ -38,7 +39,7 @@ void ModuleCommunicator::publish(const std::string &exchange,
      const std::string &key, const std::string &message) {
     _asyncTasks.push([this, exchange, key, message]() {
         _channel.startTransaction();
-        _channel.publish(exchange, key, message);
+        // _channel.publish(exchange, key, message);
         _channel.commitTransaction();
     });
     _asyncHandle->send();
@@ -71,11 +72,12 @@ bool ModuleCommunicator::syncRegisterMailbox(const std::string &exchange, const 
         _channel.declareQueue(AMQP::exclusive)
         .onSuccess([this, &taskResult, exchange, filter, f = std::move(f)]
             (const std::string &name, uint32_t messagecount, uint32_t consumercount) mutable {
-            this->_channel.bindQueue(exchange, name, filter)
+            _channel.bindQueue(exchange, name, filter)
             .onSuccess([this, &taskResult, name, f = std::move(f)]() mutable {
-                this->_channel.consume(name)
+                _channel.consume(name)
                 .onReceived(std::move(f))
                 .onSuccess([this, &taskResult]() {
+                    std::cout << "Mailbox registered !\n";
                     taskResult.push(true);
                 }).onError([this, &taskResult](const char* message) {
                     std::cerr << "Consumme failed: `" << message << "` !\n";

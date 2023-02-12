@@ -51,7 +51,8 @@ int exampleEntrypoint() {
         const auto str = std::string(msg.body(), msg.bodySize());
         std::cout << "Message received: `" << str << "` !\n";
     });
-    comm.publish("toto", "toto", "A message !");
+    for (auto i = 0U; i < 1000000; ++i)
+        comm.publish("toto", "toto", std::to_string(i) + " A message !");
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
     return 0;

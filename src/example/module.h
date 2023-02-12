@@ -7,6 +7,7 @@
 #include <rbmq/uvwConnection.h>
 #include <rbmq/utils/concurentQueue.h>
 
+#include "communicator.h"
 
 namespace rbmq::example {
 
@@ -25,9 +26,6 @@ public:
 
     bool syncRegisterMailbox(const std::string &exchange, const std::string &key,
         const std::function<void(const AMQP::Message &, uint64_t, bool)> &callback);
-        
-    // addCallback
-
 
 protected:
 
@@ -45,6 +43,9 @@ private:
 
     /// amqp channel
     AMQP::Channel _channel;
+
+    /// Communicator that interacts with rabbitmq
+    // RbmqCommunicator _rbmqComm;
 
     /// Thread handle
     std::thread _threadHandle;
