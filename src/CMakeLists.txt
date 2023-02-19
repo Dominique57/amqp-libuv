@@ -3,9 +3,14 @@ find_package(uvw REQUIRED)
 
 add_library(SOURCE_LIB STATIC
     entrypoint.cc entrypoint.h
-    rbmq/uvConnectionHandler.cc rbmq/uvConnectionHandler.h
     rbmq/uvwConnectionHandler.cc rbmq/uvwConnectionHandler.h
     rbmq/uvwConnection.cc rbmq/uvwConnection.h
+
+    rbmq/utils/concurentQueue.h
+
+    example/module.cc example/module.h
+    example/sender.cc example/sender.h
+    example/receiver.cc example/receiver.h
 )
 target_link_libraries(SOURCE_LIB
     PUBLIC

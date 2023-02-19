@@ -2,4 +2,6 @@
 
 namespace rbmq {
     int entrypoint();
+
+    int exampleEntrypoint();
 }

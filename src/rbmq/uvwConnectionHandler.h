@@ -10,55 +10,16 @@ namespace rbmq {
 class UvwConnectionHandler : public AMQP::ConnectionHandler
 {
 public:
-    UvwConnectionHandler(uvw::Loop &loop, const std::string& ip, int port)
-        : _client(loop.resource<uvw::TCPHandle>())
-    {
-        using namespace uvw;
-        if (_client) {
-            _client->on<ErrorEvent>([this](const ErrorEvent &, TCPHandle &){
-                this->closeConnection();
-            });
-            _client->connect(ip, port);
-            _client->read();
-        }
-    }
+    UvwConnectionHandler(uvw::Loop &loop, const std::string& ip, int port);
 
     virtual ~UvwConnectionHandler()
     {
         closeConnection();
     }
 
-    void closeConnection() {
-        if (_client) {
-            _client->clear();
-            _client->close();
-            _client = nullptr;
-        }
-    }
-    
-    void addDebugEvent() {
-        using namespace uvw;
-        if (_client) {
-            _client->on<ConnectEvent>([](const ConnectEvent &, TCPHandle &){
-                std::cout << "uvw::tcp connected !\n";
-            });
-            _client->on<WriteEvent>([](const WriteEvent &, TCPHandle &) {
-                std::cout << "uvw::tcp write !\n";
-            });
-            _client->on<DataEvent>([](const DataEvent &, TCPHandle &) {
-                std::cout << "uvw::tcp read data!\n";
-            });
-            _client->on<ErrorEvent>([](const ErrorEvent &e, TCPHandle &){
-                std::cerr << "uvw::tcp error : `" << e.what() << "` !\n";
-            });
-            _client->on<EndEvent>([](const EndEvent&, TCPHandle &) {
-                std::cout << "uvw::tcp endevent !\n";
-            });
-            _client->on<CloseEvent>([](const CloseEvent &, TCPHandle &){
-                std::cout << "uvw::tcp closed !\n";
-            });
-        }
-    }
+    void closeConnection();
+
+    void addDebugEvent();
 
 protected:
     /**
