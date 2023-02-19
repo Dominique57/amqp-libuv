@@ -11,11 +11,15 @@ UvwConnection::UvwConnection(UvwConnectionHandler* handler, const AMQP::Login& l
     // const auto temp = handler->getClient()->on<uvw::DataEvent>(
     _callbackHandler = handler->getClient()->on<uvw::DataEvent>(
         [this](const uvw::DataEvent& e, uvw::TCPHandle&) {
-        // Append data to the buffer
-        _buf.insert(_buf.begin(), e.data.get(), e.data.get() + e.length);
-        // Process buffer
+        // Ensure enough space allocation
+        // auto oldSize = _buf.size();
+        // auto newSize = oldSize + e.length;
+        // if (_buf.size() < newSize)
+            // _buf.resize(newSize);
+        // memcpy(_buf.data() + oldSize, e.data.get(), e.length);
+
+        _buf.insert(_buf.end(), e.data.get(), e.data.get() + e.length);
         const auto bytesConsummed = this->parse(_buf.data(), _buf.size());
-        // Remove processed bytes
         _buf.erase(_buf.begin(), _buf.begin() + bytesConsummed);
     });
 }
