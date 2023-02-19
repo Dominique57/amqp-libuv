@@ -46,12 +46,13 @@ int entrypoint() {
 
 int exampleEntrypoint() {
     auto comm = example::ModuleCommunicator();
-    const bool success = comm.syncRegisterMailbox("toto", "toto",
-        [](const AMQP::Message &msg, uint64_t, bool) {
+    auto onMsg = [](const AMQP::Message &msg, uint64_t, bool) {
         const auto str = std::string(msg.body(), msg.bodySize());
         std::cout << "Message received: `" << str << "` !\n";
-    });
-    for (auto i = 0U; i < 1000000; ++i)
+    };
+    comm.syncRegisterMailbox("toto", "toto", onMsg);
+
+    for (auto i = 0U; i < 100000; ++i)
         comm.publish("toto", "toto", std::to_string(i) + " A message !");
 
     std::this_thread::sleep_for(std::chrono::seconds(5));

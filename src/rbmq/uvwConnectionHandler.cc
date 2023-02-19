@@ -55,8 +55,6 @@ void UvwConnectionHandler::onData(AMQP::Connection*, const char* data, size_t le
     //  send all data at once, so you also need to take care of buffering
     //  the bytes that could not immediately be sent, and try to send
     //  them again when the socket becomes writable again
-    std::cout << "UvwConnectionHandler: Data to be sent !\n";
-
 
     if (_client) {
         auto buffer = std::make_unique<char[]>(len);

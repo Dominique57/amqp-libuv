@@ -9,7 +9,8 @@ add_library(SOURCE_LIB STATIC
     rbmq/utils/concurentQueue.h
 
     example/module.cc example/module.h
-    example/communicator.cc example/communicator.h
+    example/sender.cc example/sender.h
+    example/receiver.cc example/receiver.h
 )
 target_link_libraries(SOURCE_LIB
     PUBLIC

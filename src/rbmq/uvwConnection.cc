@@ -7,10 +7,10 @@ UvwConnection::UvwConnection(UvwConnectionHandler* handler, const AMQP::Login& l
         _uvwConnection(handler),
         _buf{}
 {
+    _buf.reserve(4096);
     // const auto temp = handler->getClient()->on<uvw::DataEvent>(
     _callbackHandler = handler->getClient()->on<uvw::DataEvent>(
         [this](const uvw::DataEvent& e, uvw::TCPHandle&) {
-        std::cout << "CallbackHandler !\n";
         // Append data to the buffer
         _buf.insert(_buf.begin(), e.data.get(), e.data.get() + e.length);
         // Process buffer
